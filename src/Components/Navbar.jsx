@@ -1,4 +1,13 @@
+import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+
 const Navbar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="flex-1">
@@ -32,7 +41,7 @@ const Navbar = () => {
               <a>Settings</a>
             </li>
             <li>
-              <a>Logout</a>
+              <a onClick={handleLogout}>Logout</a>
             </li>
           </ul>
         </div>
