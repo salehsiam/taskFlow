@@ -4,16 +4,18 @@ import { HiOutlinePlus } from "react-icons/hi";
 import { IoMdArrowDropright } from "react-icons/io";
 import { LuCalendar } from "react-icons/lu";
 import { AiOutlineClose } from "react-icons/ai";
-import { FaCheck, FaCross, FaCut, FaEdit } from "react-icons/fa";
+import { FaCheck, FaEdit } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "../hooks/useAxiosPublic";
 import useAuth from "../hooks/useAuth";
-import { ImCross } from "react-icons/im";
+
+const categories = ["To-Do", "In Progress", "Done"];
 
 const TaskColumn = ({ category }) => {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
+    imageUrl: "",
     category,
   });
   const [editingTask, setEditingTask] = useState(null);
@@ -49,8 +51,24 @@ const TaskColumn = ({ category }) => {
     } catch (error) {
       console.error("Error adding task:", error);
     }
-    setNewTask({ title: "", description: "", category });
+    setNewTask({ title: "", description: "", category, imageUrl: "" });
     setShowInput(false);
+  };
+
+  // Update Task
+  const updateTask = async (id) => {
+    const updatedTask = {
+      ...editedTask,
+      imageUrl: editedTask.imageUrl?.trim() === "" ? null : editedTask.imageUrl,
+      timestamp: new Date().toLocaleString(),
+    };
+    try {
+      await axiosPublic.put(`/tasks/${id}`, updatedTask);
+      setEditingTask(null);
+      refetch();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
   // Remove Task
@@ -59,18 +77,7 @@ const TaskColumn = ({ category }) => {
       await axiosPublic.delete(`/tasks/${id}`);
       refetch();
     } catch (error) {
-      console.error("Error deleting task:", error);
-    }
-  };
-
-  // Update Task
-  const updateTask = async (id) => {
-    try {
-      await axiosPublic.put(`/tasks/${id}`, editedTask);
-      setEditingTask(null);
-      refetch();
-    } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("Error removing task:", error);
     }
   };
 
@@ -91,16 +98,41 @@ const TaskColumn = ({ category }) => {
               key={task._id}
               className="bg-base-200 p-3 rounded-md hover:bg-base-100"
             >
+              {task.imageUrl && !editingTask && (
+                <img
+                  src={task.imageUrl}
+                  alt={task.title}
+                  className="w-full h-40 object-cover rounded-md mb-2"
+                />
+              )}
               <div className="flex justify-between items-center">
                 {editingTask === task._id ? (
-                  <input
-                    type="text"
-                    value={editedTask.title || task.title}
-                    onChange={(e) =>
-                      setEditedTask({ ...editedTask, title: e.target.value })
-                    }
-                    className="w-full p-2 rounded-md bg-base-100 text-text1"
-                  />
+                  <>
+                    <input
+                      type="text"
+                      value={editedTask.title || task.title}
+                      onChange={(e) =>
+                        setEditedTask({ ...editedTask, title: e.target.value })
+                      }
+                      className="w-full p-2 rounded-md bg-base-100 text-text1"
+                    />
+                    <select
+                      value={editedTask.category || task.category}
+                      onChange={(e) =>
+                        setEditedTask({
+                          ...editedTask,
+                          category: e.target.value,
+                        })
+                      }
+                      className="ml-2 p-2 rounded-md"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </>
                 ) : (
                   <h3 className="font-bold text-primary">{task.title}</h3>
                 )}
@@ -121,33 +153,49 @@ const TaskColumn = ({ category }) => {
                       </button>
                     </>
                   ) : (
-                    <FaEdit
-                      onClick={() => {
-                        setEditingTask(task._id);
-                        setEditedTask(task);
-                      }}
-                      className="cursor-pointer text-blue-500 hover:text-blue-700"
-                    />
-                  )}
-                  {editingTask === null && (
-                    <AiOutlineClose
-                      onClick={() => removeTask(task._id)}
-                      className="cursor-pointer text-red-500 hover:text-red-700"
-                    />
+                    <>
+                      <FaEdit
+                        onClick={() => {
+                          setEditingTask(task._id);
+                          setEditedTask(task);
+                        }}
+                        className="cursor-pointer text-blue-500 hover:text-blue-700"
+                      />
+                      {editingTask === null && (
+                        <AiOutlineClose
+                          onClick={() => removeTask(task._id)}
+                          className="cursor-pointer text-red-500 hover:text-red-700"
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
               {editingTask === task._id ? (
-                <textarea
-                  value={editedTask.description || task.description}
-                  onChange={(e) =>
-                    setEditedTask({
-                      ...editedTask,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 rounded-md bg-base-100 text-text1"
-                />
+                <>
+                  <textarea
+                    value={editedTask.description || task.description}
+                    onChange={(e) =>
+                      setEditedTask({
+                        ...editedTask,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 rounded-md bg-base-100 text-text1"
+                  />
+                  <input
+                    type="text"
+                    value={editedTask.imageUrl || task.imageUrl}
+                    onChange={(e) =>
+                      setEditedTask({
+                        ...editedTask,
+                        imageUrl: e.target.value,
+                      })
+                    }
+                    className="w-full p-2 rounded-md bg-base-100 text-text1 mt-2"
+                    placeholder="Image URL"
+                  />
+                </>
               ) : (
                 task.description && (
                   <p className="text-sm text-text2 mt-1">{task.description}</p>
@@ -157,16 +205,17 @@ const TaskColumn = ({ category }) => {
             </div>
           ))}
       </div>
-
       {showInput ? (
-        <div className="mt-2 space-y-2 bg-base-200 p-3 rounded-md">
+        <div className="mt-4">
           <input
             type="text"
             value={newTask.title}
             onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
             className="w-full p-2 rounded-md bg-base-100 text-text1"
             placeholder="Title"
+            maxLength={50}
           />
+
           <textarea
             value={newTask.description}
             onChange={(e) =>
@@ -174,10 +223,36 @@ const TaskColumn = ({ category }) => {
             }
             className="w-full p-2 rounded-md bg-base-100 text-text1"
             placeholder="Description"
+            maxLength={250}
           />
+
+          <input
+            type="text"
+            value={newTask.imageUrl}
+            onChange={(e) =>
+              setNewTask({ ...newTask, imageUrl: e.target.value })
+            }
+            className="w-full p-2 rounded-md bg-base-100 text-text1 outline-none"
+            placeholder="Image URL (Optional)"
+          />
+
+          {/* <select
+            value={newTask.category}
+            onChange={(e) =>
+              setNewTask({ ...newTask, category: e.target.value })
+            }
+            className="w-full p-2 rounded-md mt-2"
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select> */}
+
           <button
             onClick={addTask}
-            className="w-full py-2 bg-primary text-white rounded-md"
+            className="mt-2 bg-primary p-2 rounded-md text-white w-full"
           >
             Add Task
           </button>
