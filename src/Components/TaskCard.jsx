@@ -3,7 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000"; // Update with your backend URL if needed
+const API_URL = "https://task-flow-server-steel.vercel.app"; // Update with your backend URL if needed
 
 const TaskCard = ({ task, fetchTasks }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =

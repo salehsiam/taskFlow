@@ -1,46 +1,54 @@
-import { useState } from "react";
-import TaskColumn2 from "./TaskColoumn2";
+import React, { useState } from "react";
 
-const categories = ["To-Do", "In Progress", "Done"];
+// import { v4 as uuidv4 } from "uuid"; // To generate unique task IDs
+import TaskColumn2 from "./TaskColoumn2";
 
 const TaskBoard2 = () => {
   const [tasks, setTasks] = useState([]);
 
+  // Function to add a new task
   const addTask = (newTask) => {
-    setTasks([...tasks, { ...newTask, id: Date.now() }]);
+    const taskWithId = { ...newTask, id: uuidv4() };
+    setTasks((prevTasks) => [...prevTasks, taskWithId]);
   };
 
-  const editTask = (updatedTask) => {
-    setTasks(
-      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-    );
-  };
-
+  // Function to remove a task
   const removeTask = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
+  // Function to move a task to another category
   const moveTask = (taskId, newCategory) => {
-    setTasks(
-      tasks.map((task) =>
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
         task.id === taskId ? { ...task, category: newCategory } : task
       )
     );
   };
 
   return (
-    <div className="flex justify-center gap-4 p-5">
-      {categories.map((category) => (
-        <TaskColumn2
-          key={category}
-          category={category}
-          tasks={tasks.filter((task) => task.category === category)}
-          addTask={addTask}
-          editTask={editTask}
-          removeTask={removeTask}
-          moveTask={moveTask} // Pass moveTask as a prop
-        />
-      ))}
+    <div className="flex flex-row md:flex-col gap-4">
+      <TaskColumn2
+        category="To-Do"
+        tasks={tasks.filter((task) => task.category === "To-Do")}
+        addTask={addTask}
+        removeTask={removeTask}
+        moveTask={moveTask}
+      />
+      <TaskColumn2
+        category="In Progress"
+        tasks={tasks.filter((task) => task.category === "In Progress")}
+        addTask={addTask}
+        removeTask={removeTask}
+        moveTask={moveTask}
+      />
+      <TaskColumn2
+        category="Done"
+        tasks={tasks.filter((task) => task.category === "Done")}
+        addTask={addTask}
+        removeTask={removeTask}
+        moveTask={moveTask}
+      />
     </div>
   );
 };

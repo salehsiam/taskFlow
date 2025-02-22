@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useDrop } from "react-dnd";
 import TaskItem from "./TaskItem";
 import { HiOutlinePlus } from "react-icons/hi";
-import axios from "axios";
 
-const TaskColumn2 = ({ category, tasks, setTasks }) => {
+const TaskColumn2 = ({ category, tasks, addTask, removeTask, moveTask }) => {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -12,87 +11,30 @@ const TaskColumn2 = ({ category, tasks, setTasks }) => {
   });
   const [showInput, setShowInput] = useState(false);
 
-  // Drag-and-Drop functionality
   const [{ isOver }, drop] = useDrop({
-    accept: "TASK",
-    drop: (item) => moveTask(item._id, category), // Call moveTask
+    accept: "TASK", // The type of draggable item we are accepting
+    drop: (item) => moveTask(item.id, category), // Handle the drop
     collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
+      isOver: !!monitor.isOver(), // Is the item currently being dragged over this column?
     }),
   });
 
-  // Add Task (Backend Connected)
-  const addTask = async () => {
-    if (!newTask.title.trim()) return;
+  // Add Task
+  const handleAddTask = () => {
+    if (!newTask.title.trim()) return; // Ensure title is not empty
+    console.log("Adding task:", newTask); // Debugging log
 
-    try {
-      const res = await axios.post("http://localhost:5000/tasks", newTask);
-      if (res.data.insertedId) {
-        setTasks([...tasks, { ...newTask, _id: res.data.insertedId }]);
-      }
-      setNewTask({ title: "", description: "", category });
-      setShowInput(false);
-    } catch (error) {
-      console.error("Error adding task:", error);
-    }
-  };
-
-  // Edit Task (Backend Connected)
-  const editTask = async (updatedTask) => {
-    try {
-      await axios.put(
-        `http://localhost:5000/tasks/${updatedTask._id}`,
-        updatedTask
-      );
-      setTasks(
-        tasks.map((task) => (task._id === updatedTask._id ? updatedTask : task))
-      );
-    } catch (error) {
-      console.error("Error updating task:", error);
-    }
-  };
-
-  // Delete Task (Backend Connected)
-  const removeTask = async (taskId) => {
-    try {
-      await axios.delete(`http://localhost:5000/tasks/${taskId}`);
-      setTasks(tasks.filter((task) => task._id !== taskId));
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
-  };
-
-  // Move Task (Backend Connected)
-  const moveTask = async (taskId, newCategory) => {
-    try {
-      const taskToUpdate = tasks.find((task) => task._id === taskId);
-      if (!taskToUpdate) return;
-
-      const updatedTask = { ...taskToUpdate, category: newCategory };
-      await axios.put(`http://localhost:5000/tasks/${taskId}`, updatedTask);
-
-      setTasks(tasks.map((task) => (task._id === taskId ? updatedTask : task)));
-    } catch (error) {
-      console.error("Error moving task:", error);
-    }
+    addTask(newTask); // Add the task via the parent function
+    setNewTask({ title: "", description: "", category }); // Reset form state
+    setShowInput(false); // Hide the input form after adding the task
   };
 
   return (
-    <div
-      ref={drop}
-      className={`w-96 bg-base-300 p-4 rounded-2xl shadow-md ${
-        isOver ? "bg-gray-200" : ""
-      }`}
-    >
+    <div ref={drop} className="w-96 bg-base-300 p-4 rounded-2xl shadow-md">
       <h2 className="font-semibold">{category}</h2>
       <div className="mt-4 space-y-2">
         {tasks.map((task) => (
-          <TaskItem
-            key={task._id}
-            task={task}
-            editTask={editTask}
-            removeTask={removeTask}
-          />
+          <TaskItem key={task.id} task={task} removeTask={removeTask} />
         ))}
       </div>
 
@@ -115,7 +57,7 @@ const TaskColumn2 = ({ category, tasks, setTasks }) => {
             placeholder="Description"
           />
           <button
-            onClick={addTask}
+            onClick={handleAddTask}
             className="w-full py-2 bg-primary text-white rounded-md mt-2"
           >
             Add Task

@@ -82,7 +82,7 @@ const TaskColumn = ({ category }) => {
   };
 
   return (
-    <div className="w-96 mx-auto bg-base-300 text-text1 shadow-md rounded-2xl p-4">
+    <div className="lg:w-96 w-full  mx-auto bg-base-300 text-text1 shadow-md rounded-2xl p-4">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">{category}</h2>
         <div className="flex items-center gap-2 text-text2">

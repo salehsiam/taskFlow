@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://task-flow-server-steel.vercel.app", {
   transports: ["websocket"], // Force WebSocket transport
   reconnection: true, // Enable reconnection
   reconnectionAttempts: 5, // Try to reconnect 5 times

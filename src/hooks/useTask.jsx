@@ -13,7 +13,7 @@ const useTasks = () => {
     queryFn: async () => {
       if (!user?.email) return;
       const { data } = await axios.get(
-        `http://localhost:5000/tasks/${user.email}`
+        `https://task-flow-server-steel.vercel.app/tasks/${user.email}`
       );
       return {
         todo: data.todo.sort((a, b) => a.order - b.order),

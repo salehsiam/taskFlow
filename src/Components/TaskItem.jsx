@@ -1,38 +1,26 @@
 import { useDrag } from "react-dnd";
-import { AiOutlineClose } from "react-icons/ai";
-import { FaEdit } from "react-icons/fa";
 
-const TaskItem = ({ task, removeTask, setEditingTask }) => {
+const TaskItem = ({ task, removeTask }) => {
   const [{ isDragging }, drag] = useDrag({
-    type: "TASK",
-    item: { id: task.id, category: task.category },
+    type: "TASK", // Drag type must match what you defined in `useDrop` in `TaskColumn2`
+    item: { id: task.id }, // Data associated with the dragged item
     collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+      isDragging: monitor.isDragging(),
     }),
   });
 
   return (
     <div
       ref={drag}
-      className={`bg-base-200 p-3 rounded-md hover:bg-base-100 ${
-        isDragging ? "opacity-50" : "opacity-100"
+      className={`bg-base-100 p-3 rounded-md shadow-md ${
+        isDragging ? "opacity-50" : ""
       }`}
     >
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-primary">{task.title}</h3>
-        <div className="flex gap-2">
-          <FaEdit
-            onClick={() => setEditingTask(task)}
-            className="cursor-pointer text-blue-500 hover:text-blue-700"
-          />
-          <AiOutlineClose
-            onClick={() => removeTask(task.id)}
-            className="cursor-pointer text-red-500 hover:text-red-700"
-          />
-        </div>
-      </div>
-      <p className="text-sm text-text2 mt-1">{task.description}</p>
-      <p className="text-xs text-text3 mt-1">{task.timestamp}</p>
+      <h3 className="font-semibold">{task.title}</h3>
+      <p>{task.description}</p>
+      <button onClick={() => removeTask(task.id)} className="text-red-500 mt-2">
+        Remove
+      </button>
     </div>
   );
 };
