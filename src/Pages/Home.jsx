@@ -9,9 +9,6 @@ const Home = () => {
       <DndProvider backend={HTML5Backend}>
         <TaskBoard />
       </DndProvider>
-      <DndProvider backend={HTML5Backend}>
-        <TaskBoard2 />
-      </DndProvider>
     </div>
   );
 };
