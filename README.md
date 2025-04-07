@@ -1,7 +1,3 @@
-Here’s a well-structured and visually appealing README for your **TaskFlow** project:
-
----
-
 # 📝 TaskFlow
 
 ![TaskFlow](https://img.shields.io/badge/Task%20Management-React-blue?style=flat-square)  

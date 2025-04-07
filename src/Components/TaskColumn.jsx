@@ -56,16 +56,35 @@ const TaskColumn = ({ category }) => {
   };
 
   // Update Task
+  // const updateTask = async (id) => {
+  //   const updatedTask = {
+  //     ...editedTask,
+  //     imageUrl: editedTask.imageUrl?.trim() === "" ? null : editedTask.imageUrl,
+  //     timestamp: new Date().toLocaleString(),
+  //   };
+  //   try {
+  //     await axiosPublic.put(`/tasks/${id}`, updatedTask);
+  //     setEditingTask(null);
+  //     refetch();
+  //   } catch (error) {
+  //     console.error("Error updating task:", error);
+  //   }
+  // };
+
   const updateTask = async (id) => {
     const updatedTask = {
       ...editedTask,
-      imageUrl: editedTask.imageUrl?.trim() === "" ? null : editedTask.imageUrl,
+      imageUrl:
+        editedTask.imageUrl && editedTask.imageUrl.trim() === ""
+          ? null
+          : editedTask.imageUrl,
       timestamp: new Date().toLocaleString(),
     };
+
     try {
       await axiosPublic.put(`/tasks/${id}`, updatedTask);
-      setEditingTask(null);
-      refetch();
+      setEditingTask(null); // Reset editing mode
+      refetch(); // Refetch to get the latest task data
     } catch (error) {
       console.error("Error updating task:", error);
     }
@@ -82,7 +101,7 @@ const TaskColumn = ({ category }) => {
   };
 
   return (
-    <div className="lg:w-96 w-full  mx-auto bg-base-300 text-text1 shadow-md rounded-2xl p-4">
+    <div className="w-full sm:w-80 bg-base-300 text-text1 shadow-md rounded-2xl p-4">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">{category}</h2>
         <div className="flex items-center gap-2 text-text2">
@@ -114,29 +133,13 @@ const TaskColumn = ({ category }) => {
                       onChange={(e) =>
                         setEditedTask({ ...editedTask, title: e.target.value })
                       }
-                      className="w-full p-2 rounded-md bg-base-100 text-text1"
+                      className="w-full  border border-gray-700 p-2 rounded-md bg-base-100 text-text1"
                     />
-                    <select
-                      value={editedTask.category || task.category}
-                      onChange={(e) =>
-                        setEditedTask({
-                          ...editedTask,
-                          category: e.target.value,
-                        })
-                      }
-                      className="ml-2 p-2 rounded-md"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
                   </>
                 ) : (
                   <h3 className="font-bold text-primary">{task.title}</h3>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="ml-3 flex items-center gap-2">
                   {editingTask === task._id ? (
                     <>
                       <button
@@ -181,27 +184,44 @@ const TaskColumn = ({ category }) => {
                         description: e.target.value,
                       })
                     }
-                    className="w-full p-2 rounded-md bg-base-100 text-text1"
+                    className="w-full border border-gray-700 mt-2 p-2 rounded-md bg-base-100 text-text1"
                   />
+
                   <input
                     type="text"
-                    value={editedTask.imageUrl || task.imageUrl}
+                    value={editedTask.imageUrl || ""} // Ensure it's an empty string when cleared
+                    onChange={(e) => {
+                      const newImageUrl =
+                        e.target.value.trim() === "" ? null : e.target.value;
+                      setEditedTask({ ...editedTask, imageUrl: newImageUrl });
+                    }}
+                    className="w-full  border border-gray-700 p-2 rounded-md bg-base-100 text-text1 mt-1"
+                    placeholder="Image URL"
+                  />
+
+                  <select
+                    value={editedTask.category || task.category}
                     onChange={(e) =>
                       setEditedTask({
                         ...editedTask,
-                        imageUrl: e.target.value,
+                        category: e.target.value,
                       })
                     }
-                    className="w-full p-2 rounded-md bg-base-100 text-text1 mt-2"
-                    placeholder="Image URL"
-                  />
+                    className="w-full p-2 mt-2 border border-gray-700 rounded-md bg-base-100"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
                 </>
               ) : (
                 task.description && (
                   <p className="text-sm text-text2 mt-1">{task.description}</p>
                 )
               )}
-              <p className="text-xs text-text3 mt-1">{task.timestamp}</p>
+              <p className="text-xs text-text3 mt-2">{task.timestamp}</p>
             </div>
           ))}
       </div>
@@ -221,7 +241,7 @@ const TaskColumn = ({ category }) => {
             onChange={(e) =>
               setNewTask({ ...newTask, description: e.target.value })
             }
-            className="w-full p-2 rounded-md bg-base-100 text-text1"
+            className="w-full p-2 mt-2 rounded-md bg-base-100 text-text1"
             placeholder="Description"
             maxLength={250}
           />
@@ -232,23 +252,9 @@ const TaskColumn = ({ category }) => {
             onChange={(e) =>
               setNewTask({ ...newTask, imageUrl: e.target.value })
             }
-            className="w-full p-2 rounded-md bg-base-100 text-text1 outline-none"
+            className="w-full p-2 rounded-md bg-base-100 mt-[3px] text-text1 outline-none"
             placeholder="Image URL (Optional)"
           />
-
-          {/* <select
-            value={newTask.category}
-            onChange={(e) =>
-              setNewTask({ ...newTask, category: e.target.value })
-            }
-            className="w-full p-2 rounded-md mt-2"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select> */}
 
           <button
             onClick={addTask}
